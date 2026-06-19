@@ -3,20 +3,23 @@ package com.peerisland.orders.service.order;
 
 import com.peerisland.orders.dto.ApiRestResponse;
 import com.peerisland.orders.dto.PageRequestDto;
-import com.peerisland.orders.exception.CommonException;
+import com.peerisland.orders.dto.order.OrderCreationRequest;
+import com.peerisland.orders.dto.order.OrderStatusUpdateRequest;
 import com.peerisland.orders.exception.InvalidDataException;
 
 public interface OrderService {
 
-    ApiRestResponse createOrder();
+    ApiRestResponse createOrder(String requestId, OrderCreationRequest request) throws InvalidDataException;
 
-    ApiRestResponse getAllOrders(PageRequestDto pageRequestDto, String status);
+    ApiRestResponse getAllOrders(String requestId, PageRequestDto pageRequestDto, String status) throws InvalidDataException;
 
-    ApiRestResponse getOrderById(Long orderId) throws CommonException;
+    ApiRestResponse getOrderById(String requestId, Long orderId);
 
-    ApiRestResponse updateOrderStatus(String orderId, String status) throws InvalidDataException;
+    ApiRestResponse updateOrderStatus(String requestId, Long orderId, OrderStatusUpdateRequest request)
+            throws InvalidDataException;
 
-    ApiRestResponse cancelOrder(String orderId) throws CommonException;
+    ApiRestResponse cancelOrder(String requestId, Long orderId) throws InvalidDataException;
 
+    int processPendingOrders();
 
 }

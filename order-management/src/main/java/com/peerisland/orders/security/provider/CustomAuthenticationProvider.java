@@ -5,6 +5,7 @@ import com.peerisland.orders.entity.Customer;
 import com.peerisland.orders.exception.BadCredentialException;
 import com.peerisland.orders.exception.NotFoundException;
 import com.peerisland.orders.repository.CustomerRepository;
+import com.peerisland.orders.utility.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         log.info("CustomAuthenticationProvider: customer {} has role: {}", username, role.getRoleName());
 
         if (passwordEncoder.matches(password, customer.getPassword()) && customer.getEmail().equals(username)
-                && customer.getActive()) {
+                && Constants.ACCOUNT_STATUS_ACTIVE.equals(customer.getStatus())) {
 
             String authority = "ROLE_" + role.getRoleName();
             log.info("CustomAuthenticationProvider: Creating authentication with authority: {}", authority);

@@ -1,0 +1,399 @@
+{
+  "info": {
+    "_postman_id": "6e0f88f8-589d-4ff6-a68b-7fbcdd61f913",
+    "name": "PeerIsland Order Management",
+    "description": "Postman collection for the PeerIsland Order Management Spring Boot service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081/order-management",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "customerEmail",
+      "value": "sharath.nair@peerisland.com",
+      "type": "string"
+    },
+    {
+      "key": "customerPassword",
+      "value": "Password@123",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Ping",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/public/ping"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeded', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response && response.data) {",
+                  "  pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customerEmail}}\",\n  \"password\": \"{{customerPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/public/v1/login"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Refresh token succeeded', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response && response.data) {",
+                  "  pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/public/v1/refresh-token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Create Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response && response.data && response.data.customerId) {",
+                  "  pm.collectionVariables.set('customerId', response.data.customerId);",
+                  "  pm.collectionVariables.set('customerEmail', response.data.email);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo Customer\",\n  \"email\": \"demo.customer@example.com\",\n  \"role\": \"CUSTOMER\",\n  \"mobileNumber\": \"9876543210\",\n  \"countryCode\": \"+91\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/customers"
+          }
+        },
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/customers?page=0&size=10"
+          }
+        },
+        {
+          "name": "Get Customer By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/customers/{{customerId}}"
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sharath Nair\",\n  \"email\": \"{{customerEmail}}\",\n  \"role\": \"CUSTOMER\",\n  \"mobileNumber\": \"9999999999\",\n  \"countryCode\": \"+91\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/v1/customers/{{customerId}}"
+          }
+        },
+        {
+          "name": "Change Customer Account Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/customers/change-account-status?customerId={{customerId}}&active=true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Order created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const response = pm.response.json();",
+                  "if (response && response.data && response.data.orderId) {",
+                  "  pm.collectionVariables.set('orderId', response.data.orderId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": {{customerId}},\n  \"orderType\": 1,\n  \"branchId\": 1,\n  \"branchUniqueId\": \"BRANCH-001\",\n  \"specialNotes\": \"Leave at reception\",\n  \"items\": [\n    {\n      \"productId\": 101,\n      \"name\": \"Keyboard\",\n      \"quantity\": 1,\n      \"productPrice\": 1999.00,\n      \"imageUrl\": \"https://example.com/keyboard.png\"\n    },\n    {\n      \"productId\": 102,\n      \"name\": \"Mouse\",\n      \"quantity\": 2,\n      \"productPrice\": 799.50,\n      \"imageUrl\": \"https://example.com/mouse.png\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/v1/orders"
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/orders/{{orderId}}"
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/orders?page=0&size=10"
+          }
+        },
+        {
+          "name": "List Orders By Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/orders?page=0&size=10&status=PENDING"
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROCESSING\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/orders/{{orderId}}/status"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "requestId",
+                "value": "{{$guid}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/orders/{{orderId}}/cancel"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 package com.peerisland.orders.security.filter;
 
 
+import com.peerisland.orders.cache.InMemoryCacheService;
 import com.peerisland.orders.security.dto.SecurityProperties;
 import com.peerisland.orders.security.service.JWTService;
 import com.peerisland.orders.security.service.MyUserDetailsService;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final MyUserDetailsService userDetailsService;
     private final SecurityProperties securityProperties;
+    private final InMemoryCacheService inMemoryCacheService;
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
     private static final List<String> PUBLIC_PATHS = List.of(
@@ -55,6 +58,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith(Constants.BEARER_LITERAL)) {
             token = authHeader.replace(Constants.BEARER_LITERAL, StringUtils.EMPTY);
+            if (isAccessTokenBlacklisted(token)) {
+                log.warn("Rejected blacklisted access token");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
             username = jwtService.extractUserName(token);
         }
 
@@ -71,5 +79,10 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isAccessTokenBlacklisted(String token) {
+        String hashedToken = DigestUtils.sha256Hex(token);
+        return inMemoryCacheService.contains(Constants.BLACKLISTED_ACCESS_TOKEN_PREFIX.concat(hashedToken));
     }
 }
