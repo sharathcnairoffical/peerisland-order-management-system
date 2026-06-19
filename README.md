@@ -1,4 +1,4 @@
-# PeerIsland Order Management System
+# PeerIsland E-commerce Order Processing System
 
 Spring Boot microservice for customer and order management.
 
